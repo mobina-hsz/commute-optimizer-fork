@@ -1,13 +1,5 @@
-"""
-algorithms/genetic_algorithm.py
-Population-based optimization using selection, recombination, and mutation.
-"""
-
-from typing import Tuple
-from algorithms.base import LocalSearchSolver
-from core.state import State
 from core.problem import CommuteProblem
-from algorithms.operators import get_neighbors, crossover
+from algorithms.operators import get_neighbors, crossover, random_state
 
 
 class GeneticAlgorithmSolver(LocalSearchSolver):
@@ -18,6 +10,13 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
         self.crossover_rate: float = self.params.get("crossover_rate", 0.8)
         self.mutation_rate: float = self.params.get("mutation_rate", 0.2)
         self.elitism: int = self.params.get("elitism", 2)
+        self.tournament_size: int = self.params.get("tournament_size", 3)
+
+    def select_parent(self, population):
+        """Choose the best member from a small random tournament."""
+        size = max(1, min(self.tournament_size, len(population)))
+        group = self.rng.sample(population, size)
+        return min(group, key=self.evaluate)
 
     def solve(self) -> Tuple[State, float]:
         """
@@ -34,5 +33,11 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
         Encouraged:
         - Experimenting with population size, selection pressure, and operator rates to balance exploration vs. exploitation.
         """
-        # TODO: Implement Genetic Algorithm
-        raise NotImplementedError("Implement solve() in algorithms/genetic_algorithm.py")
+        # Create the first population of valid commute plans.
+        population = [self.problem.generate_initial_state()]
+        attempts = 0
+        while len(population) < self.population_size and attempts < self.population_size * 30:
+            candidate = random_state(self.problem, self.rng)
+            if candidate not in population:
+                population.append(candidate)
+            attempts += 1
