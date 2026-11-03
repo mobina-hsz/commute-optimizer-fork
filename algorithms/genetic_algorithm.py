@@ -54,3 +54,7 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
             population.sort(key=self.evaluate)
         # Keep the best individuals unchanged (elitism).
             new_population = population[:min(self.elitism, self.population_size)]
+            while len(new_population) < self.population_size:
+                # Tournament selection: choose the better of two random plans.
+                parent1 = self.select_parent(population)
+                parent2 = self.select_parent(population)
