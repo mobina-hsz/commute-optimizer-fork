@@ -50,3 +50,18 @@ class SimulatedAnnealingSolver(LocalSearchSolver):
             candidate = self.rng.choice(neighbors)
             candidate_cost = self.evaluate(candidate)
             difference = candidate_cost - current_cost
+            if difference < 0:
+                accept = True
+            else:
+                probability = math.exp(-difference / temperature)
+                accept = self.rng.random() < probability
+
+            if accept:
+                current = candidate
+                current_cost = candidate_cost
+
+            self.consider(current, current_cost)
+            self.log_step()
+            temperature = temperature * self.cooling_rate
+
+        return self.best_state, self.best_cost
