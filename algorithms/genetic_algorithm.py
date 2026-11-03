@@ -64,3 +64,21 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
                     child = crossover(parent1, parent2, self.problem, self.rng)
                 else:
                     child = parent1
+
+                # Mutation
+                if self.rng.random() < self.mutation_rate:
+                    neighbors = get_neighbors(child, self.problem)
+                    if neighbors:
+                        child = self.rng.choice(neighbors)
+
+                if not self.problem.is_valid_state(child):
+                    child = parent1
+
+                new_population.append(child)
+
+            population = new_population
+            generation_best = min(population, key=self.evaluate)
+            self.consider(generation_best, self.evaluate(generation_best))
+            self.log_step()
+
+        return self.best_state, self.best_cost
