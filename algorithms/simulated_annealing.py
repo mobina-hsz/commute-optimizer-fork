@@ -33,4 +33,20 @@ class SimulatedAnnealingSolver(LocalSearchSolver):
         - Ignoring the temperature parameter or turning this into pure hill climbing.
         """
         # TODO: Implement Simulated Annealing
-        raise NotImplementedError("Implement solve() in algorithms/simulated_annealing.py")
+        current = self.problem.generate_initial_state()
+        current_cost = self.evaluate(current)
+        self.consider(current, current_cost)
+        self.log_step()
+        temperature = self.initial_temp
+
+        for _ in range(self.max_iterations):
+            if temperature <= self.min_temp:
+                break
+
+            neighbors = get_neighbors(current, self.problem)
+            if not neighbors:
+                break
+
+            candidate = self.rng.choice(neighbors)
+            candidate_cost = self.evaluate(candidate)
+            difference = candidate_cost - current_cost
