@@ -58,3 +58,9 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
                 # Tournament selection: choose the better of two random plans.
                 parent1 = self.select_parent(population)
                 parent2 = self.select_parent(population)
+
+                # Make a child by combining the two parents.
+                if self.rng.random() < self.crossover_rate:
+                    child = crossover(parent1, parent2, self.problem, self.rng)
+                else:
+                    child = parent1
