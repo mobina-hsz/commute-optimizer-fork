@@ -45,3 +45,27 @@ class HillClimbingSolver(LocalSearchSolver):
                 neighbors = get_neighbors(current, self.problem)
                 if not neighbors:
                     break
+                next_cost = min(self.evaluate(item) for item in neighbors)
+                if next_cost > current_cost + TOL:
+                    break
+
+                best_neighbors = [item for item in neighbors
+                                  if self.evaluate(item) <= next_cost + TOL]
+
+                if next_cost >= current_cost - TOL:
+                    if sideways_count >= self.max_sideways:
+                        break
+                    best_neighbors = [item for item in best_neighbors if item not in visited]
+                    if not best_neighbors:
+                        break
+                    sideways_count += 1
+                else:
+                    sideways_count = 0
+
+                current = self.rng.choice(best_neighbors)
+                current_cost = self.evaluate(current)
+                visited.add(current)
+                self.consider(current, current_cost)
+                self.log_step()
+
+        return self.best_state, self.best_cost
