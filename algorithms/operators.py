@@ -22,6 +22,7 @@ def random_state(problem: CommuteProblem, rng: Optional[random.Random] = None) -
     """
     rng = rng or random
 
+    # Randomized backtracking can recover from a dead end and try another branch.
     def build_path(path: List[str]):
         if path[-1] == problem.destination:
             return tuple(path)
@@ -42,6 +43,7 @@ def random_state(problem: CommuteProblem, rng: Optional[random.Random] = None) -
         times = problem.get_valid_time_domain()
         return State(path, rng.choice(times))
 
+    # The normal initial path is always a safe fallback.
     return problem.generate_initial_state()
 
 
@@ -80,6 +82,7 @@ def get_neighbors(state: State, problem: CommuteProblem) -> List[State]:
     path = state.path
     new_paths = set()
 
+    # Replace a short section of the route with another connected sub-path.
     for start_index in range(len(path) - 1):
         last_end = min(len(path) - 1, start_index + MAX_REPLACED_EDGES)
         for end_index in range(start_index + 1, last_end + 1):
@@ -110,12 +113,14 @@ def get_neighbors(state: State, problem: CommuteProblem) -> List[State]:
              state.departure_time + problem.t_step]
     candidates = []
 
+    # This creates route-only changes and combined route + time changes.
     for new_path in new_paths:
         for new_time in times:
             candidate = State(new_path, new_time)
             if problem.is_valid_state(candidate):
                 candidates.append(candidate)
 
+    # Also include time-only changes.
     for new_time in times[1:]:
         candidate = State(path, new_time)
         if problem.is_valid_state(candidate):
@@ -157,10 +162,12 @@ def crossover(parent1: State, parent2: State, problem: CommuteProblem,
     rng = rng or random
     path1, path2 = parent1.path, parent2.path
 
+    # Blend the departure times and snap the result to a legal time slot.
     valid_times = problem.get_valid_time_domain()
     average_time = (parent1.departure_time + parent2.departure_time) / 2
     new_time = min(valid_times, key=lambda value: abs(value - average_time))
 
+    # Find intersections that are not the start or the destination.
     common_nodes = []
     for node in path1[1:-1]:
         if node in path2[1:-1]:
@@ -178,6 +185,8 @@ def crossover(parent1: State, parent2: State, problem: CommuteProblem,
             if len(new_path) == len(set(new_path)) and problem.is_valid_state(child):
                 return child
 
+    # If there is no common junction, try joining two parent route segments
+    # through a short valid bridge in the road network.
     for i in range(1, len(path1) - 1):
         for j in range(1, len(path2) - 1):
             head = path1[:i + 1]
@@ -191,6 +200,7 @@ def crossover(parent1: State, parent2: State, problem: CommuteProblem,
             if len(new_path) == len(set(new_path)) and problem.is_valid_state(child):
                 return child
 
+    # A crossover can create a loop; in that case use a valid parent.
     if problem.is_valid_state(parent1):
         return State(parent1.path, new_time)
     return State(parent2.path, new_time)
@@ -198,6 +208,7 @@ def crossover(parent1: State, parent2: State, problem: CommuteProblem,
 
 def _find_bridge(problem: CommuteProblem, start: str, end: str,
                  blocked: Set[str]) -> Optional[Path]:
+    """Find a short, loop-free connection between two route segments."""
     queue = deque([(start, (start,))])
     visited = {start}
     while queue:
