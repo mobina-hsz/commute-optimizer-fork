@@ -1,3 +1,11 @@
+"""
+algorithms/genetic_algorithm.py
+Population-based optimization using selection, recombination, and mutation.
+"""
+
+from typing import Tuple
+from algorithms.base import LocalSearchSolver
+from core.state import State
 from core.problem import CommuteProblem
 from algorithms.operators import get_neighbors, crossover, random_state
 
@@ -52,8 +60,10 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
 
         for _ in range(self.generations):
             population.sort(key=self.evaluate)
-        # Keep the best individuals unchanged (elitism).
+
+            # Keep the best individuals unchanged (elitism).
             new_population = population[:min(self.elitism, self.population_size)]
+
             while len(new_population) < self.population_size:
                 # Tournament selection: choose the better of two random plans.
                 parent1 = self.select_parent(population)

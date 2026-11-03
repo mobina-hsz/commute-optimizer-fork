@@ -29,6 +29,7 @@ class HillClimbingSolver(LocalSearchSolver):
         Prohibited:
         - Looping indefinitely on flat plateaus.
         """
+        # First run starts from the normal initial state.
         for restart in range(self.max_restarts + 1):
             if restart == 0:
                 current = self.problem.generate_initial_state()
@@ -46,6 +47,7 @@ class HillClimbingSolver(LocalSearchSolver):
                 if not neighbors:
                     break
 
+                # Find the best cost first, then choose among equally good moves.
                 next_cost = min(self.evaluate(item) for item in neighbors)
                 if next_cost > current_cost + TOL:
                     break

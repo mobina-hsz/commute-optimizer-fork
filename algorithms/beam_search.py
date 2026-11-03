@@ -38,7 +38,9 @@ class LocalBeamSearchSolver(LocalSearchSolver):
         first_state = self.problem.generate_initial_state()
         beam = [first_state]
         self.consider(first_state, self.evaluate(first_state))
-                attempts = 0
+
+        # Fill the beam with different valid starting states.
+        attempts = 0
         while len(beam) < self.beam_width and attempts < self.beam_width * 20:
             candidate = random_state(self.problem, self.rng)
             if candidate not in beam:
@@ -53,7 +55,7 @@ class LocalBeamSearchSolver(LocalSearchSolver):
         for _ in range(self.max_iterations):
             candidates = set()
 
-        # Generate neighbors from every state in the current beam.
+            # Generate neighbors from every state in the current beam.
             for state in beam:
                 for neighbor in get_neighbors(state, self.problem):
                     candidates.add(neighbor)
@@ -61,11 +63,11 @@ class LocalBeamSearchSolver(LocalSearchSolver):
             if not candidates:
                 break
 
-        # Keep the best K candidates from the combined list.
+            # Keep the best K candidates from the combined list.
             ranked = sorted(candidates, key=lambda item: (self.evaluate(item),
                                                             item.departure_time, item.path))
 
-        # Limit how many states with the same route enter the beam.
+            # Limit how many states with the same route enter the beam.
             beam = []
             route_counts = {}
             for candidate in ranked:
@@ -92,4 +94,3 @@ class LocalBeamSearchSolver(LocalSearchSolver):
                 break
 
         return self.best_state, self.best_cost
-        
