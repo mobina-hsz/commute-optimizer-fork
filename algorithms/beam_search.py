@@ -65,4 +65,31 @@ class LocalBeamSearchSolver(LocalSearchSolver):
             ranked = sorted(candidates, key=lambda item: (self.evaluate(item),
                                                             item.departure_time, item.path))
 
-                                                            
+        # Limit how many states with the same route enter the beam.
+            beam = []
+            route_counts = {}
+            for candidate in ranked:
+                count = route_counts.get(candidate.path, 0)
+                if count >= self.same_route_limit:
+                    continue
+                beam.append(candidate)
+                route_counts[candidate.path] = count + 1
+                if len(beam) >= self.beam_width:
+                    break
+
+            if not beam:
+                break
+
+            old_best = self.best_cost
+            self.consider(beam[0], self.evaluate(beam[0]))
+            if self.best_cost < old_best - TOL:
+                no_progress = 0
+            else:
+                no_progress += 1
+
+            self.log_step()
+            if no_progress >= self.patience:
+                break
+
+        return self.best_state, self.best_cost
+        
