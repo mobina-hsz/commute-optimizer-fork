@@ -53,4 +53,16 @@ class LocalBeamSearchSolver(LocalSearchSolver):
         for _ in range(self.max_iterations):
             candidates = set()
 
-            
+        # Generate neighbors from every state in the current beam.
+            for state in beam:
+                for neighbor in get_neighbors(state, self.problem):
+                    candidates.add(neighbor)
+
+            if not candidates:
+                break
+
+        # Keep the best K candidates from the combined list.
+            ranked = sorted(candidates, key=lambda item: (self.evaluate(item),
+                                                            item.departure_time, item.path))
+
+                                                            
