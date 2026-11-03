@@ -45,6 +45,7 @@ class HillClimbingSolver(LocalSearchSolver):
                 neighbors = get_neighbors(current, self.problem)
                 if not neighbors:
                     break
+
                 next_cost = min(self.evaluate(item) for item in neighbors)
                 if next_cost > current_cost + TOL:
                     break

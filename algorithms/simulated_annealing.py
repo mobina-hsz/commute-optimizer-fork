@@ -4,6 +4,7 @@ Stochastic optimization governed by a temperature schedule.
 """
 
 from typing import Tuple
+import math
 from algorithms.base import LocalSearchSolver
 from core.state import State
 from core.problem import CommuteProblem
@@ -32,7 +33,6 @@ class SimulatedAnnealingSolver(LocalSearchSolver):
         Prohibited:
         - Ignoring the temperature parameter or turning this into pure hill climbing.
         """
-        # TODO: Implement Simulated Annealing
         current = self.problem.generate_initial_state()
         current_cost = self.evaluate(current)
         self.consider(current, current_cost)
@@ -50,6 +50,7 @@ class SimulatedAnnealingSolver(LocalSearchSolver):
             candidate = self.rng.choice(neighbors)
             candidate_cost = self.evaluate(candidate)
             difference = candidate_cost - current_cost
+
             if difference < 0:
                 accept = True
             else:
