@@ -52,4 +52,5 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
 
         for _ in range(self.generations):
             population.sort(key=self.evaluate)
-            
+        # Keep the best individuals unchanged (elitism).
+            new_population = population[:min(self.elitism, self.population_size)]
