@@ -41,3 +41,15 @@ class GeneticAlgorithmSolver(LocalSearchSolver):
             if candidate not in population:
                 population.append(candidate)
             attempts += 1
+
+        # If the graph has few unique states, duplicates are better than an undersized population.
+        while len(population) < self.population_size:
+            population.append(random_state(self.problem, self.rng))
+
+        first_best = min(population, key=self.evaluate)
+        self.consider(first_best, self.evaluate(first_best))
+        self.log_step()
+
+        for _ in range(self.generations):
+            population.sort(key=self.evaluate)
+            
